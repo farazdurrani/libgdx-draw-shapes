@@ -1,32 +1,146 @@
 package com.faraz.libgdx;
 
 import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
+import net.mgsx.gltf.loaders.glb.GLBAssetLoader;
+import net.mgsx.gltf.loaders.gltf.GLTFAssetLoader;
+import net.mgsx.gltf.scene3d.lights.DirectionalLightEx;
+import net.mgsx.gltf.scene3d.scene.SceneAsset;
 
-/** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
-    private SpriteBatch batch;
-    private Texture image;
+    public static final String filename = "McdonaldsLake.glb";
+    //    public static final String filename = "BoomBox.gltf";
+    public static final String data = "/home/faraz/Android/code-workspace/libgdx-drawtriangles/assets/data/tutorial/";
+    private final String data_file = "/home/faraz/Android/code-workspace/libgdx-drawtriangles/assets/data/" + filename;
+    protected PerspectiveCamera cam;
+    protected CameraInputController camController;
+    protected ModelBatch modelBatch;
+    protected AssetManager assets;
+    protected Array<ModelInstance> instances = new Array<>();
+    protected Environment environment;
+    protected boolean loading;
+    protected Stage stage;
+    protected Label label;
+    protected BitmapFont font;
+    protected StringBuilder stringBuilder;
+    private int visibleCount;
+    private DirectionalLightEx light;
+    private static final Vector3 position = new Vector3();
+
 
     @Override
     public void create() {
-        batch = new SpriteBatch();
-        image = new Texture("libgdx.png");
+        stage = new Stage();
+        font = new BitmapFont();
+        label = new Label(" ", new Label.LabelStyle(font, Color.WHITE));
+        stage.addActor(label);
+        stringBuilder = new StringBuilder();
+
+        modelBatch = new ModelBatch();
+        environment = new Environment();
+        environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 1f, 1f, 1f, 1f));
+        light = new DirectionalLightEx();
+        light.direction.set(1, -3, 1).nor();
+        light.color.set(Color.WHITE);
+        environment.add(light);
+
+        cam = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        cam.position.set(0f, 5100f, 3000f); //for grinnel lake
+//        cam.position.set(0f, 20, 20f); //for boombox
+        cam.lookAt(0, 0, 0);
+        cam.near = 10f;
+        cam.far = 30000f;
+        cam.update();
+
+        camController = new CustomCameraInputController(cam);
+        Gdx.input.setInputProcessor(camController);
+
+        assets = new AssetManager();
+        if (data_file.endsWith(".gltf")) {
+            assets.setLoader(SceneAsset.class, ".gltf", new GLTFAssetLoader());
+        } else {
+            assets.setLoader(SceneAsset.class, data_file, new GLBAssetLoader());
+        }
+        assets.load(data_file, SceneAsset.class);
+        loading = true;
+    }
+
+    private void doneLoading() {
+        Model model = assets.get(data_file, SceneAsset.class).scene.model;
+        instances.add(new ModelInstance(model));
+        for (int i = 0; instances.isEmpty() && i < model.nodes.size; i++) {
+            String id = model.nodes.get(i).id;
+            instances.add(new ModelInstance(model, id));
+        }
+        System.out.println("How many instances " + instances.size);
+        loading = false;
+    }
+
+    protected boolean isVisible(final Camera cam, final ModelInstance instance) {
+        instance.transform.getTranslation(position);
+        return cam.frustum.pointInFrustum(position);
     }
 
     @Override
     public void render() {
-        ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
-        batch.begin();
-        batch.draw(image, 140, 210);
-        batch.end();
+        if (loading && assets.update()) {
+            doneLoading();
+        }
+        camController.update();
+
+        Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+
+        modelBatch.begin(cam);
+        visibleCount = 0;
+        for (int i = 0; i < instances.size; i++) {
+            if (isVisible(cam, instances.get(i))) {
+                modelBatch.render(instances.get(i), environment);
+                visibleCount++;
+            }
+        }
+
+        modelBatch.end();
+
+        stringBuilder.setLength(0);
+        stringBuilder.append(" FPS: ").append(Gdx.graphics.getFramesPerSecond());
+        stringBuilder.append(" Visible: ").append(visibleCount);
+        label.setText(stringBuilder);
+        stage.draw();
     }
 
     @Override
     public void dispose() {
-        batch.dispose();
-        image.dispose();
+        modelBatch.dispose();
+        instances.clear();
+        assets.dispose();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        stage.getViewport().update(width, height, true);
+    }
+
+    @Override
+    public void pause() {
+    }
+
+    @Override
+    public void resume() {
     }
 }
