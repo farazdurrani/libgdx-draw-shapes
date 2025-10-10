@@ -241,3 +241,6 @@ natives.zip
 .metadata
 .settings
 
+gradle/
+gradlew
+gradlew.bat
