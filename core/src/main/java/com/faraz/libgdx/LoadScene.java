@@ -11,7 +11,6 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.utils.Array;
@@ -63,12 +62,12 @@ public class LoadScene implements ApplicationListener {
         Gdx.input.setInputProcessor(camController);
 
         assets = new AssetManager();
-        assets.load(Main.data + "/invaderscene.g3db", Model.class);
+        assets.load(GLTFRunner.data + "/invaderscene.g3db", Model.class);
         loading = true;
     }
 
     private void doneLoading() {
-        Model model = assets.get(Main.data + "/invaderscene.g3db", Model.class);
+        Model model = assets.get(GLTFRunner.data + "/invaderscene.g3db", Model.class);
         ModelInstance modelInstance = new ModelInstance(model);
         BoundingBox boundingBox = new BoundingBox();
         modelInstance.calculateBoundingBox(boundingBox);

@@ -5,30 +5,29 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
+import com.badlogic.gdx.graphics.g3d.utils.FirstPersonCameraController;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.ScreenUtils;
 import net.mgsx.gltf.loaders.glb.GLBAssetLoader;
 import net.mgsx.gltf.loaders.gltf.GLTFAssetLoader;
 import net.mgsx.gltf.scene3d.lights.DirectionalLightEx;
 import net.mgsx.gltf.scene3d.scene.SceneAsset;
 
-public class Main extends ApplicationAdapter {
-    public static final String filename = "McdonaldsLake.glb";
+public class GLTFRunner extends ApplicationAdapter {
+    public static final String filename = "Grinnell_Lake.glb";
     //    public static final String filename = "BoomBox.gltf";
     public static final String data = "/home/faraz/Android/code-workspace/libgdx-drawtriangles/assets/data/tutorial/";
     private final String data_file = "/home/faraz/Android/code-workspace/libgdx-drawtriangles/assets/data/" + filename;
     protected PerspectiveCamera cam;
-    protected CameraInputController camController;
+    protected CustomCameraInputController camController;
     protected ModelBatch modelBatch;
     protected AssetManager assets;
     protected Array<ModelInstance> instances = new Array<>();
@@ -68,6 +67,7 @@ public class Main extends ApplicationAdapter {
         cam.update();
 
         camController = new CustomCameraInputController(cam);
+//        camController = new CustomFirstPersonCameraController(cam);
         Gdx.input.setInputProcessor(camController);
 
         assets = new AssetManager();
@@ -82,8 +82,7 @@ public class Main extends ApplicationAdapter {
 
     private void doneLoading() {
         Model model = assets.get(data_file, SceneAsset.class).scene.model;
-        instances.add(new ModelInstance(model));
-        for (int i = 0; instances.isEmpty() && i < model.nodes.size; i++) {
+        for (int i = 0; i < model.nodes.size; i++) {
             String id = model.nodes.get(i).id;
             instances.add(new ModelInstance(model, id));
         }
@@ -110,7 +109,11 @@ public class Main extends ApplicationAdapter {
         visibleCount = 0;
         for (int i = 0; i < instances.size; i++) {
             if (isVisible(cam, instances.get(i))) {
-                modelBatch.render(instances.get(i), environment);
+                ModelInstance instance = instances.get(i);
+                //todo experiment
+
+                //todo experiment
+                modelBatch.render(instance, environment);
                 visibleCount++;
             }
         }

@@ -2,8 +2,7 @@ package com.faraz.libgdx.lwjgl3;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-import com.faraz.libgdx.LoadScene;
-import com.faraz.libgdx.Main;
+import com.faraz.libgdx.GLTFRunner;
 
 /** Launches the desktop (LWJGL3) application. */
 public class Lwjgl3Launcher {
@@ -13,7 +12,7 @@ public class Lwjgl3Launcher {
     }
 
     private static Lwjgl3Application createApplication() {
-        return new Lwjgl3Application(new LoadScene(), getDefaultConfiguration());
+        return new Lwjgl3Application(new GLTFRunner(), getDefaultConfiguration());
     }
 
     private static Lwjgl3ApplicationConfiguration getDefaultConfiguration() {
