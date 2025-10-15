@@ -16,6 +16,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ScreenUtils;
 import net.mgsx.gltf.loaders.glb.GLBAssetLoader;
 import net.mgsx.gltf.loaders.gltf.GLTFAssetLoader;
 import net.mgsx.gltf.scene3d.lights.DirectionalLightEx;
@@ -26,7 +27,7 @@ public class GLTFRunner extends ApplicationAdapter {
     //    public static final String filename = "BoomBox.gltf";
     public static final String data = "/home/faraz/Android/code-workspace/libgdx-drawtriangles/assets/data/tutorial/";
     private final String data_file = "/home/faraz/Android/code-workspace/libgdx-drawtriangles/assets/data/" + filename;
-    protected PerspectiveCamera cam;
+    protected FreeFlowingCamera cam;
     protected CustomCameraInputController camController;
     protected ModelBatch modelBatch;
     protected AssetManager assets;
@@ -58,12 +59,12 @@ public class GLTFRunner extends ApplicationAdapter {
         light.color.set(Color.WHITE);
         environment.add(light);
 
-        cam = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        cam.position.set(0f, 5100f, 3000f); //for grinnel lake
+        cam = new FreeFlowingCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), new Vector3(0.0f, 0.0f, 3.0f));
+        cam.position.set(0f, 51000f, 91000f); //for grinnel lake
 //        cam.position.set(0f, 20, 20f); //for boombox
-        cam.lookAt(0, 0, 0);
-        cam.near = 10f;
-        cam.far = 30000f;
+//        cam.lookAt(0, 0, 0);
+        cam.near = 2500f;
+        cam.far = 91000f;
         cam.update();
 
         camController = new CustomCameraInputController(cam);
@@ -82,7 +83,10 @@ public class GLTFRunner extends ApplicationAdapter {
 
     private void doneLoading() {
         Model model = assets.get(data_file, SceneAsset.class).scene.model;
+//        ModelInstance modelInstance = new ModelInstance(model);
+//        instances.add(modelInstance);
         for (int i = 0; i < model.nodes.size; i++) {
+            //todo undo below
             String id = model.nodes.get(i).id;
             instances.add(new ModelInstance(model, id));
         }
@@ -91,8 +95,10 @@ public class GLTFRunner extends ApplicationAdapter {
     }
 
     protected boolean isVisible(final Camera cam, final ModelInstance instance) {
-        instance.transform.getTranslation(position);
-        return cam.frustum.pointInFrustum(position);
+//        instance.transform.getTranslation(position);
+//        return cam.frustum.pointInFrustum(position);
+        //todo undo above
+        return true;
     }
 
     @Override
