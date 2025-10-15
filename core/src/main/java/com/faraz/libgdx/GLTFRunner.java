@@ -23,8 +23,8 @@ import net.mgsx.gltf.scene3d.lights.DirectionalLightEx;
 import net.mgsx.gltf.scene3d.scene.SceneAsset;
 
 public class GLTFRunner extends ApplicationAdapter {
-//    public static final String filename = "Grinnell_Lake.glb";
-        public static final String filename = "BoomBox.gltf";
+    public static final String filename = "Grinnell_Lake.glb";
+//        public static final String filename = "BoomBox.gltf";
     public static final String data = "/home/faraz/Android/code-workspace/libgdx-drawtriangles/assets/data/tutorial/";
     private final String data_file = "/home/faraz/Android/code-workspace/libgdx-drawtriangles/assets/data/" + filename;
     protected PerspectiveCamera cam;
@@ -59,15 +59,14 @@ public class GLTFRunner extends ApplicationAdapter {
         light.color.set(Color.WHITE);
         environment.add(light);
 
-        cam = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-//        cam.position.set(0f, 2500f, 5000f); //for grinnel lake
-        cam.position.set(0f, 20, 20f); //for boombox
-        cam.lookAt(0, 0, 0);
-        cam.near = 2500f;
-        cam.far = 91000f;
+        cam = new PerspectiveCamera(67f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        cam.position.set(0f, 5100f, 0f);
+        cam.lookAt(Vector3.Zero);
+        cam.near = 10f;
+        cam.far = 30000f;
         cam.update();
 
-        camController = new FirstPersonCameraController(cam);
+        camController = new CustomFirstPersonCameraController(cam);
         Gdx.input.setInputProcessor(camController);
 
         loadAsset();
@@ -83,11 +82,6 @@ public class GLTFRunner extends ApplicationAdapter {
         }
         System.out.println("How many instances " + instances.size);
         loading = false;
-    }
-
-    protected boolean isVisible(final Camera cam, final ModelInstance instance) {
-        instance.transform.getTranslation(position);
-        return cam.frustum.pointInFrustum(position);
     }
 
     @Override
@@ -117,6 +111,13 @@ public class GLTFRunner extends ApplicationAdapter {
         stringBuilder.append(" Visible: ").append(visibleCount);
         label.setText(stringBuilder);
         stage.draw();
+    }
+
+    private boolean isVisible(final Camera cam, final ModelInstance instance) {
+//        instance.transform.getTranslation(position);
+//        return cam.frustum.pointInFrustum(position);
+        //todo undo above
+        return true;
     }
 
     @Override
