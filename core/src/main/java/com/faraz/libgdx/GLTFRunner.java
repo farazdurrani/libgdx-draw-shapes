@@ -23,12 +23,12 @@ import net.mgsx.gltf.scene3d.lights.DirectionalLightEx;
 import net.mgsx.gltf.scene3d.scene.SceneAsset;
 
 public class GLTFRunner extends ApplicationAdapter {
-    public static final String filename = "Grinnell_Lake.glb";
-    //    public static final String filename = "BoomBox.gltf";
+//    public static final String filename = "Grinnell_Lake.glb";
+        public static final String filename = "BoomBox.gltf";
     public static final String data = "/home/faraz/Android/code-workspace/libgdx-drawtriangles/assets/data/tutorial/";
     private final String data_file = "/home/faraz/Android/code-workspace/libgdx-drawtriangles/assets/data/" + filename;
-    protected FreeFlowingCamera cam;
-    protected CustomCameraInputController camController;
+    protected PerspectiveCamera cam;
+    protected FirstPersonCameraController camController;
     protected ModelBatch modelBatch;
     protected AssetManager assets;
     protected Array<ModelInstance> instances = new Array<>();
@@ -59,34 +59,25 @@ public class GLTFRunner extends ApplicationAdapter {
         light.color.set(Color.WHITE);
         environment.add(light);
 
-        cam = new FreeFlowingCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), new Vector3(0.0f, 0.0f, 3.0f));
-        cam.position.set(0f, 51000f, 91000f); //for grinnel lake
-//        cam.position.set(0f, 20, 20f); //for boombox
-//        cam.lookAt(0, 0, 0);
+        cam = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+//        cam.position.set(0f, 2500f, 5000f); //for grinnel lake
+        cam.position.set(0f, 20, 20f); //for boombox
+        cam.lookAt(0, 0, 0);
         cam.near = 2500f;
         cam.far = 91000f;
         cam.update();
 
-        camController = new CustomCameraInputController(cam);
-//        camController = new CustomFirstPersonCameraController(cam);
+        camController = new FirstPersonCameraController(cam);
         Gdx.input.setInputProcessor(camController);
 
-        assets = new AssetManager();
-        if (data_file.endsWith(".gltf")) {
-            assets.setLoader(SceneAsset.class, ".gltf", new GLTFAssetLoader());
-        } else {
-            assets.setLoader(SceneAsset.class, data_file, new GLBAssetLoader());
-        }
+        loadAsset();
         assets.load(data_file, SceneAsset.class);
         loading = true;
     }
 
     private void doneLoading() {
         Model model = assets.get(data_file, SceneAsset.class).scene.model;
-//        ModelInstance modelInstance = new ModelInstance(model);
-//        instances.add(modelInstance);
         for (int i = 0; i < model.nodes.size; i++) {
-            //todo undo below
             String id = model.nodes.get(i).id;
             instances.add(new ModelInstance(model, id));
         }
@@ -95,10 +86,8 @@ public class GLTFRunner extends ApplicationAdapter {
     }
 
     protected boolean isVisible(final Camera cam, final ModelInstance instance) {
-//        instance.transform.getTranslation(position);
-//        return cam.frustum.pointInFrustum(position);
-        //todo undo above
-        return true;
+        instance.transform.getTranslation(position);
+        return cam.frustum.pointInFrustum(position);
     }
 
     @Override
@@ -116,9 +105,6 @@ public class GLTFRunner extends ApplicationAdapter {
         for (int i = 0; i < instances.size; i++) {
             if (isVisible(cam, instances.get(i))) {
                 ModelInstance instance = instances.get(i);
-                //todo experiment
-
-                //todo experiment
                 modelBatch.render(instance, environment);
                 visibleCount++;
             }
@@ -151,5 +137,14 @@ public class GLTFRunner extends ApplicationAdapter {
 
     @Override
     public void resume() {
+    }
+
+    private void loadAsset() {
+        assets = new AssetManager();
+        if (data_file.endsWith(".gltf")) {
+            assets.setLoader(SceneAsset.class, ".gltf", new GLTFAssetLoader());
+        } else {
+            assets.setLoader(SceneAsset.class, data_file, new GLBAssetLoader());
+        }
     }
 }
