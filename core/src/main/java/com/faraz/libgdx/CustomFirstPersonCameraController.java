@@ -13,6 +13,7 @@ public class CustomFirstPersonCameraController extends FirstPersonCameraControll
 
     public CustomFirstPersonCameraController(Camera camera) {
         super(camera);
+        velocity = 500f;
     }
 
     @Override
@@ -24,11 +25,5 @@ public class CustomFirstPersonCameraController extends FirstPersonCameraControll
         camera.translate(tmpV1.set(camera.direction).scl(amount * 50f));
         camera.update();
         return true;
-    }
-
-    @Override
-    public void update () {
-        velocity = 500f;
-        super.update(Gdx.graphics.getDeltaTime());
     }
 }
